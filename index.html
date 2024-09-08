@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>India</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      #chart-container {
+        position: relative;
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart-container"></div>
+    <script src="https://fastly.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://fastly.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+    <script>
+      let mapData = {};
+
+      fetch(
+        "https://js_hosting-active-warthog-mf.cfapps.sap.hana.ondemand.com/interestByRegion"
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          mapData = data.map((item) => {
+            return {
+              name: item.geoName,
+              value: item.value[0],
+            };
+          });
+          console.log(mapData); // Print mapData after fetch
+
+          var dom = document.getElementById("chart-container");
+          var myChart = echarts.init(dom, null, {
+            renderer: "canvas",
+            useDirtyRect: false,
+          });
+          var app = {};
+          var option;
+
+          myChart.showLoading();
+          $.get("./India.json", function (indiaJson) {
+            myChart.hideLoading();
+            echarts.registerMap("India", indiaJson);
+            option = {
+              title: {
+                text: "India - Google Trends Data",
+                subtext: "Data from Google Trends",
+                sublink: "https://trends.google.com/trends/",
+                left: "right",
+              },
+              tooltip: {
+                trigger: "item",
+                showDelay: 0,
+                transitionDuration: 0.2,
+              },
+              visualMap: {
+                left: "right",
+                min: 0,
+                max: 100,
+                inRange: {
+                  color: [
+                    "#FF0000",
+                    "#E61A00",
+                    "#CC3300",
+                    "#B34C00",
+                    "#996600",
+                    "#808000",
+                    "#669900",
+                    "#4DB300",
+                    "#33CC00",
+                    "#1AE600",
+                    "#00FF00",
+                  ],
+                },
+                text: ["High Interest", "Low Interest"],
+                calculable: true,
+              },
+              toolbox: {
+                show: true,
+                orient: "vertical",
+                left: "left",
+                top: "top",
+                feature: {
+                  dataView: { readOnly: false },
+                  restore: {},
+                  saveAsImage: {},
+                },
+              },
+              series: [
+                {
+                  name: "Search Interest",
+                  type: "map",
+                  roam: true,
+                  map: "India",
+                  emphasis: {
+                    label: {
+                      show: true,
+                    },
+                  },
+                  data: mapData,
+                },
+              ],
+            };
+            myChart.setOption(option);
+          });
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
+
+      if (option && typeof option === "object") {
+        myChart.setOption(option);
+      }
+
+      window.addEventListener("resize", myChart.resize);
+    </script>
+  </body>
+</html>
