@@ -24,7 +24,16 @@
       let mapData = {};
 
       fetch(
-        "https://js_hosting-active-warthog-mf.cfapps.sap.hana.ondemand.com/interestByRegion"
+        "https://js_hosting-active-warthog-mf.cfapps.sap.hana.ondemand.com/interestByRegion",
+
+        {
+          method: "GET",
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+            Expires: "0",
+          },
+        }
       )
         .then((response) => response.json())
         .then((data) => {
